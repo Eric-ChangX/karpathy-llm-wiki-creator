@@ -1,6 +1,6 @@
 ---
 name: karpathy-llm-wiki-creator
-version: 2.2.0
+version: 2.3.0
 description: "在指定路径下初始化一个新的 LLM Wiki 知识库（Karpathy 风格：raw/ 不动 + wiki/ 按 type 分子目录累积综合 + wiki/ 内 index/overview/QUESTIONS/log 四个 meta 页（log 是 grep-friendly 行为流水线）+ lint.py 9 项健康检查 + 人类 runbook README + PDF/图片 sidecar 元数据规则 + frontmatter aliases 跨语言别名 + Obsidian 友好）。当用户说『新建一个知识库』『初始化一个 LLM Wiki』『为 X 领域开一个 wiki』『scaffold 一个新知识库』时使用。每个 KB 一个领域（飞书、AI、个人项目等各自独立）。本 skill 只负责脚手架，不导入任何 raw 内容。"
 ---
 
@@ -35,13 +35,20 @@ description: "在指定路径下初始化一个新的 LLM Wiki 知识库（Karpa
 ├── CLAUDE.md              # @AGENTS.md import（Claude Code 入口）
 ├── README.md              # 人类入口（标题含领域名）
 ├── .gitignore
-├── raw/
-│   ├── articles/          # 手动保存的文章
-│   ├── clippings/         # Web Clipper 主入口
-│   ├── images/            # 截图、图片
-│   ├── pdfs/              # PDF + 元数据
-│   ├── notes/             # 随手记录
-│   └── personal/          # ★ 用户自己写的素材
+├── raw/                       # 双层：inbox + archive
+│   ├── articles/              # Inbox: 手动保存的文章
+│   ├── clippings/             # Inbox: Web Clipper 主入口
+│   ├── images/                # Inbox: 截图、图片
+│   ├── pdfs/                  # Inbox: PDF + 元数据
+│   ├── notes/                 # Inbox: 随手记录
+│   ├── personal/              # ★ Inbox: 用户自己写的素材
+│   └── archive/               # 已 ingest 归档区，子目录镜像 inbox
+│       ├── articles/
+│       ├── clippings/
+│       ├── images/
+│       ├── pdfs/
+│       ├── notes/
+│       └── personal/
 ├── wiki/
 │   ├── index.md           # 内容目录索引（meta）
 │   ├── overview.md        # 高层综述 + Health Dashboard（meta）
@@ -57,7 +64,7 @@ description: "在指定路径下初始化一个新的 LLM Wiki 知识库（Karpa
     └── lint.py            # 9 项 wiki 健康检查
 ```
 
-每个**没有自带文件的空目录**放一个 `.gitkeep`（必须的：raw 的 6 个子目录、wiki/sources、wiki/concepts、wiki/entities、wiki/synthesis、outputs/）。`wiki/templates/` 因为有 4 个 .md 模板文件，不需要 .gitkeep。
+每个**没有自带文件的空目录**放一个 `.gitkeep`（必须的：raw 的 6 个 inbox 子目录、`raw/archive/` 的 6 个镜像子目录、wiki/sources、wiki/concepts、wiki/entities、wiki/synthesis、outputs/）。`wiki/templates/` 因为有 4 个 .md 模板文件，不需要 .gitkeep。
 
 ### 3. 复制模板文件
 

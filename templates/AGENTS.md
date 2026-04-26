@@ -27,13 +27,20 @@
 ├── AGENTS.md              # 本文件，canonical schema
 ├── CLAUDE.md              # Claude Code 入口（单行 @AGENTS.md import；不要删）
 ├── README.md              # 人类入口，介绍这个 KB 的领域和用法
-├── raw/                   # 原始来源，人类所有，LLM 只读
-│   ├── articles/          # 手动保存的文章（markdown）
-│   ├── clippings/         # Obsidian Web Clipper 剪藏（主入口）
-│   ├── images/            # 截图、图片 + 同名 sidecar 元数据
-│   ├── pdfs/              # PDF + 同名 sidecar 元数据
-│   ├── notes/             # 随手记录
-│   └── personal/          # ★ 用户自己写的文章、报告、笔记（一等公民来源）
+├── raw/                   # 原始来源，人类所有
+│   ├── articles/          # Inbox: 手动保存的文章（markdown）
+│   ├── clippings/         # Inbox: Obsidian Web Clipper 剪藏（主入口）
+│   ├── images/            # Inbox: 截图、图片 + 同名 sidecar 元数据
+│   ├── pdfs/              # Inbox: PDF + 同名 sidecar 元数据
+│   ├── notes/             # Inbox: 随手记录
+│   ├── personal/          # ★ Inbox: 用户自己写的文章、报告、笔记
+│   └── archive/           # 已 ingest 归档区，子目录镜像上方 inbox 类型
+│       ├── articles/
+│       ├── clippings/
+│       ├── images/
+│       ├── pdfs/
+│       ├── notes/
+│       └── personal/
 ├── wiki/                  # LLM 完全拥有
 │   ├── index.md           # 内容目录索引（content-oriented）
 │   ├── overview.md        # 高层综述 + Health Dashboard
@@ -51,14 +58,18 @@
 
 ### 各目录规则
 
-- **`raw/` ingest 之后永不修改**（含改名、移动、删除），是 source of truth。Web Clipper 落盘那一刻的整理是允许的；一旦在 wiki 中被引用即冻结。
-  - 子目录是组织方式，不是行为约束。LLM 跨子目录读；用户存放时按内容类型放对应子目录。
-  - **`personal/` 是用户自己写的素材**（投资笔记、分析报告、个人思考），与外部来源同等待遇，可以被 ingest 成 source page。
+- **`raw/` 双层结构 — inbox + archive**：
+  - **顶层 6 个 typed 子目录**（`articles/` / `clippings/` / `images/` / `pdfs/` / `notes/` / `personal/`）是 **inbox**——人类把新材料放进来等待 ingest。LLM 只在这些目录里找待 ingest 的文件。
+  - **`raw/archive/`** 是已 ingest 的归档区，下面镜像 inbox 的 6 个 typed 子目录。**ingest 流程的最后一步必须把文件（含 sidecar）从 inbox 子目录移入 archive/同名子目录/**。
+  - **archive 中的文件冻结**——不再改名、移动、删除，是真正的 source of truth。inbox 阶段允许整理（修文件名、补 sidecar），一旦移入 archive 即不可变。
+  - 把已 ingest 的文件搬出 inbox，inbox 永远只列「待办」。要看「下一篇 ingest 什么」时一目了然，不会和已处理的混在一起。
+  - **`personal/` 是用户自己写的素材**（投资笔记、分析报告、个人思考），与外部来源同等待遇，可以被 ingest 成 source page；归档时进 `raw/archive/personal/`。
   - **`pdfs/` 与 `images/` 必须配同名 `.md` sidecar metadata**，否则 LLM 很难稳定理解上下文：
     - PDF 例：`raw/pdfs/company_report.pdf` + `raw/pdfs/company_report.md`。
     - 图片例：`raw/images/product_screenshot.png` + `raw/images/product_screenshot.md`。
     - sidecar `.md` 是 ingest 入口；source page 的 `raw:` 指向 sidecar `.md`，sidecar 再记录实际二进制文件名。
     - sidecar 至少写：标题、文件名、来源/URL（如有）、抓取日期、为什么保存、图片/PDF 内容简述、希望 LLM 关注的 angle。
+    - **归档时二进制和 sidecar `.md` 一起移**到 `raw/archive/<同名子目录>/`，sidecar 内的「文件名」字段不需要改（仍是裸文件名）。
 - **`wiki/` 按 type 分子目录**：
   - `wiki/sources/` — type:source
   - `wiki/entities/` — type:entity
@@ -100,7 +111,7 @@ source page 描述「某一份 raw 来源」本身，frontmatter 不同：
 type: source
 created: 2026-04-26
 updated: 2026-04-26
-raw: "raw/clippings/2026-04-26_短标题.md"   # 对应 raw 入口文件的相对路径，必填；PDF/图片写 sidecar .md
+raw: "raw/archive/clippings/2026-04-26_短标题.md"   # 已归档文件的相对路径，必填；PDF/图片写 sidecar .md
 original_url:                                # 原文 URL（如有）
 author:                                      # 原作者（如有）
 published:                                   # 原文发布日期（如有）
@@ -128,17 +139,18 @@ source page **不写 `sources:` 字段**——它自己就是 source。
 
 ### 1. Ingest（摄入新来源）
 
-用户把新文件放入 `raw/<某子目录>/` 并要求处理时：
+用户把新文件放入 `raw/<某 inbox 子目录>/` 并要求处理时：
 
-1. 读全文。带图片的 markdown 先读文本，再按需 `Read` 配套图片获得额外上下文。
+1. 读全文。带图片的 markdown 先读文本，再按需 `Read` 配套图片获得额外上下文。PDF/图片必须读对应 sidecar `.md`。
 2. **先和用户简短对齐 angle 与重点**，再动手写。
-3. 按「命名约定」在 `wiki/sources/` 创建 source page。同日同主题须加来源简称区分，避免覆盖。可以从 `wiki/templates/source.md` 起手。
+3. 按「命名约定」在 `wiki/sources/` 创建 source page。**`raw:` 字段直接写归档后的路径** `raw/archive/<同名子目录>/<filename>`（即第 7 步移过去之后的位置），同日同主题须加来源简称区分。可以从 `wiki/templates/source.md` 起手。
 4. 扫 `wiki/index.md`，找出受影响的 entity / concept / synthesis 页面：
    - 已存在 → 更新内容，标注与旧观点的一致 / 矛盾。
    - 应存在但缺失 → 新建到对应子目录（`wiki/entities/`、`wiki/concepts/`、`wiki/synthesis/`），起手用对应模板。
 5. 更新 `wiki/index.md`（新增条目或修改简介）。
 6. 若有未解问题，登记到 `wiki/QUESTIONS.md`。
-7. 在 `wiki/log.md` 追加一条 `ingest` 记录。
+7. **归档**：把 `raw/<某 inbox 子目录>/<filename>` 移到 `raw/archive/<同名子目录>/<filename>`。PDF/图片必须**和 sidecar `.md` 一起**移；sidecar 内的字段不需要改。
+8. 在 `wiki/log.md` 追加一条 `ingest` 记录。
 
 一次 ingest 通常触动 5–15 个页面。
 

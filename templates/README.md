@@ -16,7 +16,13 @@
 
 ## raw/ 怎么放
 
-`raw/` 是人类拥有的原始来源。LLM 可以读取，但 ingest 之后不要再改名、移动或删除，因为 `wiki/sources/` 会引用它。
+`raw/` 是人类拥有的原始来源，分两层：
+
+- **顶层 6 个 typed 子目录是 inbox**——把待 ingest 的新材料放进对应类型的子目录。LLM 只在这里找待处理的文件。
+- **`raw/archive/<同名子目录>/` 是已 ingest 的归档区**。ingest 完成后 LLM 会自动把文件搬到 archive 对应位置，inbox 永远只列「下一篇该 ingest 什么」。
+- archive 中的文件**冻结**（不再改名/移动/删除），是真正的 source of truth。inbox 阶段允许整理（修文件名、补 sidecar）。
+
+inbox 子目录用法：
 
 - `raw/clippings/`：Obsidian Web Clipper 剪藏，日常最主要入口。适合网页文章、博客、文档页。
 - `raw/articles/`：手动保存或整理过的文章 markdown。适合你自己从网页、邮件、聊天记录中清理出的长文。
@@ -25,7 +31,7 @@
 - `raw/notes/`：临时想法、会议碎片、随手记录。适合还没成文但值得进入知识库的材料。
 - `raw/personal/`：你自己写的文章、分析报告、投资笔记、长期思考。这里的内容是一等公民来源，不比外部文章低一等。
 
-PDF/图片的 sidecar `.md` 至少写清楚：标题、实际文件名、来源或 URL、抓取日期、为什么保存、内容简述、希望 LLM 关注的 angle。
+PDF/图片的 sidecar `.md` 至少写清楚：标题、实际文件名、来源或 URL、抓取日期、为什么保存、内容简述、希望 LLM 关注的 angle。归档时二进制和 sidecar 一起搬过去。
 
 ## wiki/ 怎么读
 
