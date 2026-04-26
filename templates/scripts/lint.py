@@ -2,12 +2,13 @@
 """Wiki 健康检查 — 对照 AGENTS.md schema 跑 9 项机械检查。
 
 用法:
-    python scripts/lint.py           # 输出到 stdout
-    python scripts/lint.py --write   # 同时写到 outputs/<YYYY-MM-DD>_lint_<short>.md
+    py scripts/lint.py           # Windows: 输出到 stdout
+    py scripts/lint.py --write   # Windows: 同时写到 outputs/<YYYY-MM-DD>_lint_<short>.md
 
 stdlib only。无外部依赖。
 """
 import argparse
+import ast
 import datetime
 import hashlib
 import re
@@ -76,6 +77,9 @@ def parse_frontmatter(text):
         if v == "[]":
             fm[k] = []
             current_list = None
+        elif v.startswith("[") and v.endswith("]"):
+            fm[k] = parse_inline_list(v)
+            current_list = None
         elif v == "":
             fm[k] = []
             current_list = fm[k]
@@ -85,8 +89,19 @@ def parse_frontmatter(text):
     return fm, "\n".join(lines[end + 1:])
 
 
+def parse_inline_list(value):
+    """Parse a small YAML-style inline list such as ["A", "B"]."""
+    try:
+        parsed = ast.literal_eval(value)
+    except Exception:
+        parsed = [part.strip().strip("\"'") for part in value.strip("[]").split(",")]
+    if not isinstance(parsed, list):
+        return []
+    return [str(item).strip() for item in parsed if str(item).strip()]
+
+
 def collect_wiki_pages():
-    """Return dict: stem → {path, rel_to_wiki, frontmatter, body, raw_text, key}."""
+    """Return dict: wiki-relative page id → page metadata."""
     pages = {}
     if not WIKI.exists():
         return pages
@@ -106,7 +121,8 @@ def collect_wiki_pages():
             "body": body,
             "raw_text": text,
         }
-        pages[md.stem] = info
+        key = rel.with_suffix("").as_posix()
+        pages[key] = info
     return pages
 
 
@@ -151,30 +167,47 @@ def collect_all_wikilinks():
 
 
 def page_aliases(info):
-    """All link forms that should resolve to this page: stem AND subdir/stem."""
+    """All link forms that should resolve to this page: stem, subdir/stem, and aliases."""
     forms = {info["rel_to_wiki"].stem}
     if len(info["rel_to_wiki"].parts) > 1:
         forms.add(info["rel_to_wiki"].with_suffix("").as_posix())
+    fm = info["frontmatter"] or {}
+    aliases = fm.get("aliases", [])
+    if isinstance(aliases, str):
+        aliases = parse_inline_list(aliases) if aliases.startswith("[") else [aliases]
+    for alias in aliases or []:
+        alias = str(alias).strip()
+        if alias:
+            forms.add(alias)
     return forms
 
 
 # ---------- 9 checks ----------
 
 def check_1_broken_wikilinks(pages, references):
-    """[[X]] / ![[X]] target where no matching wiki page or output file exists."""
+    """[[X]] / ![[X]] target where no matching page/output exists, or a bare target is ambiguous."""
     findings = []
-    valid_targets = set()
+    target_map = defaultdict(list)
     for info in pages.values():
-        valid_targets |= page_aliases(info)
+        for alias in page_aliases(info):
+            target_map[alias].append(info)
     # also include meta files at wiki root
     for name in ("index", "overview", "QUESTIONS"):
-        valid_targets.add(name)
+        target_map[name].append({"rel_to_root": WIKI / f"{name}.md"})
     for target, ref_list in sorted(references.items()):
         if target.startswith("outputs/") or target.startswith("outputs\\"):
             continue
-        if target in valid_targets:
+        if target in target_map:
+            if "/" not in target and "\\" not in target and len(target_map[target]) > 1:
+                matches = ", ".join(
+                    i["rel_to_root"].as_posix() for i in target_map[target]
+                )
+                for ref in ref_list:
+                    findings.append(
+                        f"  - `[[{target}]]` in {ref['source'].relative_to(ROOT).as_posix()} "
+                        f"存在歧义，可匹配: {matches}"
+                    )
             continue
-        # also try resolving "concepts/Foo" against pages
         for ref in ref_list:
             findings.append(f"  - `[[{target}]]` in {ref['source'].relative_to(ROOT).as_posix()}")
     return findings

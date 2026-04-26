@@ -31,8 +31,8 @@
 ├── raw/                   # 原始来源，人类所有，LLM 只读
 │   ├── articles/          # 手动保存的文章（markdown）
 │   ├── clippings/         # Obsidian Web Clipper 剪藏（主入口）
-│   ├── images/            # 截图、图片
-│   ├── pdfs/              # PDF + 配套元数据
+│   ├── images/            # 截图、图片 + 同名 sidecar 元数据
+│   ├── pdfs/              # PDF + 同名 sidecar 元数据
 │   ├── notes/             # 随手记录
 │   └── personal/          # ★ 用户自己写的文章、报告、笔记（一等公民来源）
 ├── wiki/                  # LLM 完全拥有
@@ -54,6 +54,11 @@
 - **`raw/` ingest 之后永不修改**（含改名、移动、删除），是 source of truth。Web Clipper 落盘那一刻的整理是允许的；一旦在 wiki 中被引用即冻结。
   - 子目录是组织方式，不是行为约束。LLM 跨子目录读；用户存放时按内容类型放对应子目录。
   - **`personal/` 是用户自己写的素材**（投资笔记、分析报告、个人思考），与外部来源同等待遇，可以被 ingest 成 source page。
+  - **`pdfs/` 与 `images/` 必须配同名 `.md` sidecar metadata**，否则 LLM 很难稳定理解上下文：
+    - PDF 例：`raw/pdfs/company_report.pdf` + `raw/pdfs/company_report.md`。
+    - 图片例：`raw/images/product_screenshot.png` + `raw/images/product_screenshot.md`。
+    - sidecar `.md` 是 ingest 入口；source page 的 `raw:` 指向 sidecar `.md`，sidecar 再记录实际二进制文件名。
+    - sidecar 至少写：标题、文件名、来源/URL（如有）、抓取日期、为什么保存、图片/PDF 内容简述、希望 LLM 关注的 angle。
 - **`wiki/` 按 type 分子目录**：
   - `wiki/sources/` — type:source
   - `wiki/entities/` — type:entity
@@ -94,7 +99,7 @@ source page 描述「某一份 raw 来源」本身，frontmatter 不同：
 type: source
 created: 2026-04-26
 updated: 2026-04-26
-raw: "raw/clippings/2026-04-26_短标题.md"   # 对应 raw 文件的相对路径，必填
+raw: "raw/clippings/2026-04-26_短标题.md"   # 对应 raw 入口文件的相对路径，必填；PDF/图片写 sidecar .md
 original_url:                                # 原文 URL（如有）
 author:                                      # 原作者（如有）
 published:                                   # 原文发布日期（如有）
@@ -151,7 +156,7 @@ source page **不写 `sources:` 字段**——它自己就是 source。
 
 ### 3. Lint（健康检查）
 
-通过 `python scripts/lint.py` 执行，**只输出报告，不自动改 wiki**。9 项机械检查：
+通过 `py scripts/lint.py`（Windows）或 `python scripts/lint.py`（其它环境）执行，**只输出报告，不自动改 wiki**。9 项机械检查：
 
 1. **断链**：`[[X]]` / `![[X]]` 找不到对应文件。
 2. **孤儿页**：wiki 页面没有任何 inbound link。

@@ -1,7 +1,7 @@
 ---
 name: karpathy-llm-wiki-creator
-version: 2.0.0
-description: "在指定路径下初始化一个新的 LLM Wiki 知识库（Karpathy 风格：raw/ 不动 + wiki/ 按 type 分子目录累积综合 + index/overview/QUESTIONS 三个 meta 页 + log.md 时间线 + lint.py 9 项健康检查 + Obsidian 友好）。当用户说『新建一个知识库』『初始化一个 LLM Wiki』『为 X 领域开一个 wiki』『scaffold 一个新知识库』时使用。每个 KB 一个领域（飞书、AI、个人项目等各自独立）。本 skill 只负责脚手架，不导入任何 raw 内容。"
+version: 2.1.0
+description: "在指定路径下初始化一个新的 LLM Wiki 知识库（Karpathy 风格：raw/ 不动 + wiki/ 按 type 分子目录累积综合 + index/overview/QUESTIONS 三个 meta 页 + log.md 时间线 + lint.py 9 项健康检查 + 人类 runbook README + PDF/图片 sidecar 元数据规则 + frontmatter aliases 跨语言别名 + Obsidian 友好）。当用户说『新建一个知识库』『初始化一个 LLM Wiki』『为 X 领域开一个 wiki』『scaffold 一个新知识库』时使用。每个 KB 一个领域（飞书、AI、个人项目等各自独立）。本 skill 只负责脚手架，不导入任何 raw 内容。"
 ---
 
 # Karpathy LLM Wiki Creator
@@ -67,7 +67,7 @@ description: "在指定路径下初始化一个新的 LLM Wiki 知识库（Karpa
 |---|---|---|
 | `templates/AGENTS.md` | `<target>/AGENTS.md` | 无 |
 | `templates/CLAUDE.md` | `<target>/CLAUDE.md` | 无 |
-| `templates/README.md` | `<target>/README.md` | `{{DOMAIN}}` → 领域名 |
+| `templates/README.md` | `<target>/README.md` | 无（runbook 已领域无关） |
 | `templates/log.md` | `<target>/log.md` | `{{DATE}}` → 今日日期（YYYY-MM-DD），`{{DOMAIN}}` → 领域名 |
 | `templates/gitignore` | `<target>/.gitignore` | 无（注意目标文件名带点） |
 | `templates/wiki/index.md` | `<target>/wiki/index.md` | 无 |
