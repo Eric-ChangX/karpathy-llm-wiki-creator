@@ -12,7 +12,7 @@ grep "^## \[" log.md | tail -10
 
 ## [{{DATE}}] scaffold | initial scaffold for {{DOMAIN}}
 
-由 `llm-wiki-scaffold` skill 创建：
+由 `karpathy-llm-wiki-creator` skill 创建：
 
 - 目录：`raw/`、`raw/assets/`、`wiki/`、`wiki/sources/`、`outputs/`、`scripts/`
 - 文件：`AGENTS.md`（canonical schema）、`CLAUDE.md`（stub）、`index.md`、`log.md`、`.gitignore`

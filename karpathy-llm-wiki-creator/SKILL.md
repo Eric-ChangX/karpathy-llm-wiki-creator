@@ -1,10 +1,12 @@
 ---
-name: llm-wiki-scaffold
+name: karpathy-llm-wiki-creator
 version: 1.0.0
 description: "在指定路径下初始化一个新的 LLM Wiki 知识库（Karpathy 风格：raw/ 不动 + wiki/ 累积综合 + index.md 导航 + log.md 时间线 + Obsidian 友好）。当用户说『新建一个知识库』『初始化一个 LLM Wiki』『为 X 领域开一个 wiki』『scaffold 一个新知识库』时使用。每个 KB 一个领域（飞书、AI、个人项目等各自独立）。本 skill 只负责脚手架，不导入任何 raw 内容。"
 ---
 
-# LLM Wiki Scaffold
+# Karpathy LLM Wiki Creator
+
+参考 Andrej Karpathy 提出的「LLM Wiki」工作流：原始来源 immutable，LLM 在上面累积综合页面，index 导航 + log 记录演化。
 
 为新领域知识库创建标准 scaffold。每个领域独立一个目录，互不干扰。
 

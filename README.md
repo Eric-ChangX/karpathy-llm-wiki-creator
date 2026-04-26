@@ -8,7 +8,7 @@ Skills are self-contained instruction packs that Claude loads on demand when a u
 
 | Skill | Purpose |
 |---|---|
-| [llm-wiki-scaffold](llm-wiki-scaffold/) | Initialize a new LLM Wiki knowledge base (Karpathy-style: `raw/` + `wiki/` + `index.md` + `log.md`, Obsidian-friendly). |
+| [karpathy-llm-wiki-creator](karpathy-llm-wiki-creator/) | Initialize a new LLM Wiki knowledge base (Karpathy-style: `raw/` + `wiki/` + `index.md` + `log.md`, Obsidian-friendly). |
 
 ## Installing locally
 
@@ -16,10 +16,10 @@ Skills are loaded from `~/.claude/skills/<skill-name>/`. To install one from thi
 
 ```bash
 # Linux / macOS
-cp -r llm-wiki-scaffold ~/.claude/skills/
+cp -r karpathy-llm-wiki-creator ~/.claude/skills/
 
 # Windows (PowerShell)
-Copy-Item -Recurse llm-wiki-scaffold $env:USERPROFILE\.claude\skills\
+Copy-Item -Recurse karpathy-llm-wiki-creator $env:USERPROFILE\.claude\skills\
 ```
 
 After copying, restart Claude Code (or just open a new session) — the skill will appear in the available-skills list.
