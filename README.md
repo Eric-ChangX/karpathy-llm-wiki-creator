@@ -5,8 +5,8 @@ A [Claude Code](https://claude.com/claude-code) / [Claude Agent SDK](https://doc
 - `raw/` holds source material, organized into 6 typed subdirs (`articles/`, `clippings/`, `images/`, `pdfs/`, `notes/`, `personal/`); **immutable** after ingest. `pdfs/` and `images/` require same-name `.md` sidecar metadata so the LLM has a real ingest entry point.
 - `wiki/` holds LLM-curated synthesis pages, **subdirectorized by type** (`sources/`, `entities/`, `concepts/`, `synthesis/`)
 - `wiki/index.md` is a content-oriented navigation file; `wiki/overview.md` is the high-level summary + Health Dashboard; `wiki/QUESTIONS.md` is the open-question queue
-- `log.md` is a chronological append-only timeline of every ingest / query / schema / lint / scaffold operation
-- `scripts/lint.py` runs 9 mechanical health checks: broken wikilinks (with cross-subdir ambiguity detection), orphan pages, frontmatter validity, type enum, source-raw integrity, outputs ref integrity, index completeness, log format, and type-vs-subdir consistency. Honours frontmatter `aliases:` for cross-language names.
+- `wiki/log.md` is the **action timeline** — a grep-friendly append-only record of every ingest / query / schema / lint / scaffold operation
+- `scripts/lint.py` runs 9 mechanical health checks: broken wikilinks (with cross-subdir ambiguity detection), orphan pages, frontmatter validity, type enum, source-raw integrity, outputs ref integrity, index completeness, `wiki/log.md` format, and type-vs-subdir consistency. Honours frontmatter `aliases:` for cross-language names.
 - Page frontmatter supports `aliases: []` for cross-language names (English/Chinese, abbreviations, common typos)
 - The whole tree is Obsidian-friendly (wikilinks, frontmatter, graph view)
 - The scaffolded KB ships with a `README.md` runbook (quick start, per-raw-subdir usage, daily workflow, hand-edit safety rules) so future-you can pick it up cold
@@ -44,7 +44,6 @@ What you get after scaffold (this is the end-state structure of every new KB):
 ├── AGENTS.md              # Canonical schema (read by Codex; @-imported by CLAUDE.md)
 ├── CLAUDE.md              # Claude Code entry — single line: @AGENTS.md
 ├── README.md              # Human-facing runbook (quick start, daily workflow)
-├── log.md                 # Append-only timeline: ingest / query / schema / lint / scaffold
 ├── raw/                   # Human-owned sources; LLM read-only after ingest
 │   ├── articles/          # Hand-saved articles (markdown)
 │   ├── clippings/         # Obsidian Web Clipper output (main entry)
@@ -56,6 +55,7 @@ What you get after scaffold (this is the end-state structure of every new KB):
 │   ├── index.md           # Content-oriented index (graph-excluded)
 │   ├── overview.md        # High-level summary + Health Dashboard
 │   ├── QUESTIONS.md       # Open-question queue
+│   ├── log.md             # Action timeline — grep-friendly ingest/query/schema/lint/scaffold history
 │   ├── sources/           # type:source — one page per raw source
 │   ├── entities/          # type:entity — people, orgs, products, works, papers
 │   ├── concepts/          # type:concept — ideas, frameworks, techniques (uses aliases)
@@ -76,8 +76,8 @@ karpathy-llm-wiki-creator/
 ├── README.md              # This file
 ├── LICENSE
 └── templates/             # Files copied verbatim into each new KB on scaffold
-    ├── AGENTS.md  CLAUDE.md  README.md  log.md  gitignore
-    ├── wiki/{index,overview,QUESTIONS}.md
+    ├── AGENTS.md  CLAUDE.md  README.md  gitignore
+    ├── wiki/{index,overview,QUESTIONS,log}.md
     ├── wiki/templates/{source,entity,concept,synthesis}.md
     └── scripts/lint.py
 ```

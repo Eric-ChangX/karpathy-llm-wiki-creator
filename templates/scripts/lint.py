@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parent.parent
 WIKI = ROOT / "wiki"
 RAW = ROOT / "raw"
 OUTPUTS = ROOT / "outputs"
-LOG = ROOT / "log.md"
+LOG = ROOT / "wiki" / "log.md"
 
 TYPE_DIR = {
     "source": "sources",
@@ -33,7 +33,7 @@ TYPE_DIR = {
     "concept": "concepts",
     "synthesis": "synthesis",
 }
-META_FILES = {"index.md", "overview.md", "QUESTIONS.md"}
+META_FILES = {"index.md", "overview.md", "QUESTIONS.md", "log.md"}
 WIKILINK_RE = re.compile(r'(!?)\[\[([^\]|#]+?)(?:#[^\]|]+)?(?:\|[^\]]+)?\]\]')
 LOG_HEADING_RE = re.compile(r'^## \[(\d{4}-\d{2}-\d{2})\] (\w+) \| (.+)$')
 VALID_OPS = {"ingest", "query", "lint", "schema", "scaffold"}
@@ -192,7 +192,7 @@ def check_1_broken_wikilinks(pages, references):
         for alias in page_aliases(info):
             target_map[alias].append(info)
     # also include meta files at wiki root
-    for name in ("index", "overview", "QUESTIONS"):
+    for name in ("index", "overview", "QUESTIONS", "log"):
         target_map[name].append({"rel_to_root": WIKI / f"{name}.md"})
     for target, ref_list in sorted(references.items()):
         if target.startswith("outputs/") or target.startswith("outputs\\"):

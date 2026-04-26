@@ -5,7 +5,7 @@
 > 本文件是 schema 的 **canonical source**。`CLAUDE.md` 是 Claude Code 入口（`@AGENTS.md` import）；所有结构规则只在这里改。
 
 - 用户负责：sourcing、提问、确定方向、判断重点。
-- LLM 负责：阅读 `raw/` 来源，维护 `wiki/` 页面，更新 `wiki/index.md` 与 `log.md`，保持交叉引用一致。
+- LLM 负责：阅读 `raw/` 来源，维护 `wiki/` 页面，更新 `wiki/index.md` 与 `wiki/log.md`，保持交叉引用一致。
 
 本文件是 schema，用户和 LLM 共同演化它。
 
@@ -27,7 +27,6 @@
 ├── AGENTS.md              # 本文件，canonical schema
 ├── CLAUDE.md              # Claude Code 入口（单行 @AGENTS.md import；不要删）
 ├── README.md              # 人类入口，介绍这个 KB 的领域和用法
-├── log.md                 # 时间线日志（chronological, append-only）
 ├── raw/                   # 原始来源，人类所有，LLM 只读
 │   ├── articles/          # 手动保存的文章（markdown）
 │   ├── clippings/         # Obsidian Web Clipper 剪藏（主入口）
@@ -39,6 +38,7 @@
 │   ├── index.md           # 内容目录索引（content-oriented）
 │   ├── overview.md        # 高层综述 + Health Dashboard
 │   ├── QUESTIONS.md       # 开放问题队列
+│   ├── log.md             # 行为流水线：grep-friendly ingest / query 历史
 │   ├── sources/           # 每篇 raw 来源对应一篇 source page
 │   ├── concepts/          # 概念、框架、技术、模式
 │   ├── entities/          # 人物、组织、产品、作品、论文
@@ -66,9 +66,10 @@
   - `wiki/synthesis/` — type:synthesis
   - 其他子目录均不允许。新增 type 必须先改本 schema。
 - **`wiki/templates/`** 存放页面模板（`source.md` / `entity.md` / `concept.md` / `synthesis.md`），LLM 创建新页时套用。模板不参与 lint 的 wikilink / orphan 检查。
-- **`wiki/index.md` / `overview.md` / `QUESTIONS.md`** 是 wiki 根的 meta 页面：
+- **`wiki/index.md` / `overview.md` / `QUESTIONS.md` / `log.md`** 是 wiki 根的 meta 页面：
   - frontmatter 只需 `graph-excluded: true`（让 Obsidian graph view 不把它们当节点）。
   - 没有 `type` 字段，不参与 type-vs-子目录检查。
+  - `log.md` 是**行为流水线**：grep-friendly 地累积每次 ingest / query / schema / lint / scaffold 操作，append-only。详见下文「log.md 行格式」。
 - **`outputs/`** 是 bucket，不分子目录。文件名规范：`YYYY-MM-DD_kind_短标题.ext`（`kind` ∈ `{slides, chart, table, export, lint, query}`）。在相关 wiki 页面引用：图片/PDF 用 `![[outputs/2026-04-26_chart_xxx.png]]`，markdown / slide deck 用 `[[outputs/2026-04-26_slides_xxx]]`。
 - **`scripts/`** 存放为这个 wiki 服务的辅助脚本。`lint.py` 是必备的；其他按需新增（搜索、批量重命名、ingest 自动化等）。每个脚本第一行写一句话说明用途。
 
@@ -137,7 +138,7 @@ source page **不写 `sources:` 字段**——它自己就是 source。
    - 应存在但缺失 → 新建到对应子目录（`wiki/entities/`、`wiki/concepts/`、`wiki/synthesis/`），起手用对应模板。
 5. 更新 `wiki/index.md`（新增条目或修改简介）。
 6. 若有未解问题，登记到 `wiki/QUESTIONS.md`。
-7. 在 `log.md` 追加一条 `ingest` 记录。
+7. 在 `wiki/log.md` 追加一条 `ingest` 记录。
 
 一次 ingest 通常触动 5–15 个页面。
 
@@ -152,7 +153,7 @@ source page **不写 `sources:` 字段**——它自己就是 source。
    - markdown 形态（comparison、新关联、综合判断）→ 通常落到 `wiki/synthesis/`。
    - 非 markdown 形态（slide deck / chart / table / canvas）→ 落到 `outputs/`，按上文 `outputs/` 约定使用 `![[outputs/...]]` 或 `[[outputs/...]]` 在相关 wiki 页面引用。
 5. 发现的新 open question 进 `wiki/QUESTIONS.md`。
-6. 重要 query 在 `log.md` 留一条；琐碎可省。
+6. 重要 query 在 `wiki/log.md` 留一条；琐碎可省。
 
 ### 3. Lint（健康检查）
 
@@ -165,7 +166,7 @@ source page **不写 `sources:` 字段**——它自己就是 source。
 5. **source page raw 字段完整性**：source page 必须有 `raw` 字段且对应文件存在。
 6. **outputs 引用断链**：`![[outputs/X]]` / `[[outputs/X]]` 落不到真实文件。
 7. **index.md 缺漏**：wiki 页存在但 `wiki/index.md` 没列。
-8. **log.md 行格式**：`##` 标题不匹配 `## [YYYY-MM-DD] <op> | <title>` 或 op 非法。
+8. **wiki/log.md 行格式**：`##` 标题不匹配 `## [YYYY-MM-DD] <op> | <title>` 或 op 非法。
 9. **页面位置错**：type 与所在子目录不匹配（如 type:concept 不在 `wiki/concepts/`）。
 
 加 `--write` 同时把报告落到 `outputs/<YYYY-MM-DD>_lint_<short>.md`。
@@ -186,20 +187,22 @@ source page **不写 `sources:` 字段**——它自己就是 source。
 
 ## log.md 行格式
 
-每条以 `## [YYYY-MM-DD] <op> | <title>` 开头，便于 grep：
+`wiki/log.md` 是**行为流水线**——以 grep-friendly 格式累积 ingest / query / schema / lint / scaffold 历史。每条以 `## [YYYY-MM-DD] <op> | <title>` 开头：
 
 ```bash
-grep "^## \[" log.md | tail -10
+grep "^## \[" wiki/log.md | tail -10            # 最近 10 条
+grep "^## \[2026-04\]" wiki/log.md              # 某月
+grep "^## \[.*\] ingest " wiki/log.md           # 只看 ingest
 ```
 
-`<op>` ∈ `{ingest, query, lint, schema, scaffold}`。
+`<op>` ∈ `{ingest, query, lint, schema, scaffold}`。append-only：错条用新条目修订/翻案，不重写历史。
 
 ---
 
 ## 协作约定
 
 - **Ingest 前先和用户对齐 angle 再动手写**，不要直接长篇大论地填页面。
-- 大的结构变动（新增分类、改命名规范）改本文件并在 `log.md` 记一条 `schema` 操作。`CLAUDE.md` 不要写实质规则。
+- 大的结构变动（新增分类、改命名规范）改本文件并在 `wiki/log.md` 记一条 `schema` 操作。`CLAUDE.md` 不要写实质规则。
 - 不批量 refactor wiki，**单点演进**优先。
 - 不在 `raw/` 中的内容写入 wiki 时必须标注「推理」或「外部知识」，区分于一手来源。
 - 此 schema 持续与用户共同演化；当某条规则反复被违反或反复被绕过，提出修订方案。

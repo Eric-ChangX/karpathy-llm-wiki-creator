@@ -9,7 +9,7 @@
 1. 把新材料放进 `raw/` 的合适子目录。
 2. 对文件名做一次简单整理，尽量包含日期和短标题。
 3. 对 LLM 说：`ingest raw/clippings/2026-04-26_xxx.md，重点关注……`
-4. LLM 会先和你确认 angle，再更新 `wiki/sources/`、相关 `wiki/entities/` / `wiki/concepts/` / `wiki/synthesis/`、`wiki/index.md`、`wiki/QUESTIONS.md` 和 `log.md`。
+4. LLM 会先和你确认 angle，再更新 `wiki/sources/`、相关 `wiki/entities/` / `wiki/concepts/` / `wiki/synthesis/`、`wiki/index.md`、`wiki/QUESTIONS.md` 和 `wiki/log.md`。
 5. 你 review LLM 写出的 wiki 页面，要求它补充、删减或改重点。
 6. 跑 `py scripts/lint.py`，确认 9 项机械检查通过。
 7. 用 git 提交这一轮变更。
@@ -91,10 +91,10 @@ git commit -m "ingest: short title"
 - 可以手改：`raw/` 中尚未 ingest 的文件、`README.md`、有意识要演化规则时的 `AGENTS.md`。
 - 谨慎手改：`wiki/` 页面。更推荐让 LLM 按你的反馈改，这样它会同步更新 index、questions 和 log。
 - 不要改：已 ingest 的 `raw/` 文件路径和文件名。
-- 不要随手改：`log.md`。它是 append-only 时间线，schema/ingest/query/lint 的重要记录应追加，不应重写历史。
+- 不要随手改：`wiki/log.md`。它是 append-only 时间线，schema/ingest/query/lint 的重要记录应追加，不应重写历史。
 
 ## Schema
 
 所有结构规则在 [AGENTS.md](AGENTS.md)。Claude Code 通过 [CLAUDE.md](CLAUDE.md) 的 `@AGENTS.md` import 自动加载同一份规则。
 
-修改 schema 时，必须同步在 [log.md](log.md) 追加一条 `schema` 记录。
+修改 schema 时，必须同步在 [wiki/log.md](wiki/log.md) 追加一条 `schema` 记录。
