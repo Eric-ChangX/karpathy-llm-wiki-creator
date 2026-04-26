@@ -1,41 +1,50 @@
-# claude-skills
+# Karpathy LLM Wiki Creator
 
-Personal collection of [Claude Code](https://claude.com/claude-code) / Claude Agent SDK skills.
+A [Claude Code](https://claude.com/claude-code) / [Claude Agent SDK](https://docs.claude.com/en/api/agent-sdk) skill that scaffolds a new personal knowledge base in the style proposed by [Andrej Karpathy](https://karpathy.bearblog.dev/) — an "LLM Wiki" where:
 
-Skills are self-contained instruction packs that Claude loads on demand when a user request matches the skill's trigger description. See [Anthropic's skills repo](https://github.com/anthropics/skills) for the official format.
+- `raw/` holds source material, **immutable** after ingest
+- `wiki/` holds LLM-curated synthesis pages, accumulated over time
+- `index.md` is a content-oriented navigation file (humans read it first, then drill in)
+- `log.md` is a chronological append-only timeline of every ingest / query / schema change
+- The whole tree is Obsidian-friendly (wikilinks, frontmatter, graph view)
 
-## Skills in this repo
+The skill itself is **just a scaffold** — it creates the directory structure and seed files, then hands off to the user. Ingest of actual content is a separate workflow driven by the `AGENTS.md` schema the scaffold writes.
 
-| Skill | Purpose |
-|---|---|
-| [karpathy-llm-wiki-creator](karpathy-llm-wiki-creator/) | Initialize a new LLM Wiki knowledge base (Karpathy-style: `raw/` + `wiki/` + `index.md` + `log.md`, Obsidian-friendly). |
+## Install
 
-## Installing locally
-
-Skills are loaded from `~/.claude/skills/<skill-name>/`. To install one from this repo:
+Skills load from `~/.claude/skills/<skill-name>/`. Copy this repo's contents into a directory there:
 
 ```bash
 # Linux / macOS
-cp -r karpathy-llm-wiki-creator ~/.claude/skills/
+git clone https://github.com/Eric-ChangX/karpathy-llm-wiki-creator.git ~/.claude/skills/karpathy-llm-wiki-creator
 
 # Windows (PowerShell)
-Copy-Item -Recurse karpathy-llm-wiki-creator $env:USERPROFILE\.claude\skills\
+git clone https://github.com/Eric-ChangX/karpathy-llm-wiki-creator.git $env:USERPROFILE\.claude\skills\karpathy-llm-wiki-creator
 ```
 
-After copying, restart Claude Code (or just open a new session) — the skill will appear in the available-skills list.
+Restart Claude Code (or open a new session) and the skill will appear in the available-skills list.
 
-## Layout per skill
+## Use
+
+In a Claude Code session, just ask:
+
+> 给 AI 研究开一个新知识库，放在 `E:/Knowledge bases/AI/`
+
+Claude will trigger this skill, ask one or two clarifying questions (target path, domain name), then create the full directory tree, write the `AGENTS.md` schema, make the first git commit, and tell you where to drop your first source file.
+
+## Layout
 
 ```
-<skill-name>/
-├── SKILL.md         # frontmatter (name/version/description) + instructions
-├── templates/       # static files the skill copies into the user's workspace (optional)
-├── references/      # background knowledge the skill loads on demand (optional)
-└── scripts/         # helper scripts the skill invokes (optional)
+karpathy-llm-wiki-creator/
+├── SKILL.md             # Frontmatter + step-by-step scaffold instructions for the LLM
+└── templates/           # Files copied verbatim into each new knowledge base
+    ├── AGENTS.md        # Canonical schema — read by Codex, @-imported by CLAUDE.md
+    ├── CLAUDE.md        # One-line @AGENTS.md import (Claude Code does not read AGENTS.md natively)
+    ├── index.md         # Empty content index
+    ├── log.md           # Timeline log with {{DATE}} / {{DOMAIN}} placeholders
+    └── gitignore        # Renamed to .gitignore on copy; ignores Obsidian workspace state
 ```
-
-`SKILL.md`'s `description` field is what Claude reads to decide when to trigger the skill — keep it specific and example-rich.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+[MIT](LICENSE)
