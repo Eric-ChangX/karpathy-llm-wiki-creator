@@ -1,0 +1,13 @@
+# Obsidian workspace（本地状态，不该跟版本走）
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/cache
+.obsidian/graph.json
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# 临时
+*.tmp
+*~
