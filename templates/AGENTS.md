@@ -24,7 +24,8 @@
 
 ```
 .
-├── AGENTS.md       # 本文件，schema
+├── AGENTS.md       # 本文件，canonical schema
+├── CLAUDE.md       # Claude Code 入口，单行 @AGENTS.md import（不要删）
 ├── index.md        # wiki 目录索引（content-oriented）
 ├── log.md          # 时间线日志（chronological, append-only）
 ├── raw/            # 原始来源，只读
@@ -98,7 +99,7 @@ source page **不写 `sources:` 字段**——它自己就是 source。
 
 1. 读全文。若是带图片的 markdown，先读文本，再按需 `Read` `raw/assets/` 中的图片获得额外上下文。
 2. **先和用户简短对齐 angle 与重点**，再动手写。
-3. 在 `wiki/sources/YYYY-MM-DD_短标题.md` 写一篇 source page：原文出处、要点、关键引用、用户当前 angle 下的重点。
+3. 按下文「命名约定」在 `wiki/sources/` 创建 source page：原文出处、要点、关键引用、用户当前 angle 下的重点。同日同主题须按命名约定加来源简称区分，避免覆盖。
 4. 扫 `index.md`，找出受影响的 entity / concept / self / topic 页面：
    - 已存在 → 更新内容，标注与旧观点的一致 / 矛盾。
    - 应存在但缺失 → 新建。
@@ -116,7 +117,7 @@ source page **不写 `sources:` 字段**——它自己就是 source。
 3. 综合回答，**每个事实都带 `[[页面名]]` 或原文引用**。
 4. **关键**：若答案本身有积累价值，主动询问是否归档：
    - markdown 形态（comparison、新关联、综合判断）→ 新建 wiki 页面。
-   - 非 markdown 形态（slide deck / chart / table / canvas）→ 落到 `outputs/`，并在相关 wiki 页面里 `[[link]]` 过去。
+   - 非 markdown 形态（slide deck / chart / table / canvas）→ 落到 `outputs/`，按上文 `outputs/` 约定使用 `![[outputs/...]]`（图片/PDF 嵌入）或 `[[outputs/...]]`（markdown / slide deck 跳转）在相关 wiki 页面引用。
 5. 重要 query 在 `log.md` 留一条；琐碎可省。
 
 ### 3. Lint（健康检查）
