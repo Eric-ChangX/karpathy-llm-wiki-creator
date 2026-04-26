@@ -37,29 +37,50 @@ Claude will trigger this skill, ask one or two clarifying questions (target path
 
 ## Layout
 
+What you get after scaffold (this is the end-state structure of every new KB):
+
 ```
-karpathy-llm-wiki-creator/
-├── SKILL.md                       # Frontmatter + step-by-step scaffold instructions for the LLM
-└── templates/                     # Files & directories copied verbatim into each new KB
-    ├── AGENTS.md                  # Canonical schema — read by Codex, @-imported by CLAUDE.md
-    ├── CLAUDE.md                  # One-line @AGENTS.md import
-    ├── README.md                  # Human-facing runbook (domain-agnostic, no placeholders)
-    ├── log.md                     # Timeline log ({{DATE}} / {{DOMAIN}} placeholders)
-    ├── gitignore                  # Renamed to .gitignore on copy
-    ├── wiki/
-    │   ├── index.md               # Content index (graph-excluded)
-    │   ├── overview.md            # High-level summary + Health Dashboard
-    │   ├── QUESTIONS.md           # Open-question queue
-    │   └── templates/             # Page templates the LLM uses when creating new pages
-    │       ├── source.md
-    │       ├── entity.md
-    │       ├── concept.md
-    │       └── synthesis.md
-    └── scripts/
-        └── lint.py                # 9-check wiki linter (stdlib only)
+<your-kb>/
+├── AGENTS.md              # Canonical schema (read by Codex; @-imported by CLAUDE.md)
+├── CLAUDE.md              # Claude Code entry — single line: @AGENTS.md
+├── README.md              # Human-facing runbook (quick start, daily workflow)
+├── log.md                 # Append-only timeline: ingest / query / schema / lint / scaffold
+├── raw/                   # Human-owned sources; LLM read-only after ingest
+│   ├── articles/          # Hand-saved articles (markdown)
+│   ├── clippings/         # Obsidian Web Clipper output (main entry)
+│   ├── images/            # Screenshots/images + same-name .md sidecar metadata
+│   ├── pdfs/              # PDFs + same-name .md sidecar metadata
+│   ├── notes/             # Loose notes, meeting fragments
+│   └── personal/          # ★ User-authored writing — first-class source
+├── wiki/                  # LLM-curated knowledge layer
+│   ├── index.md           # Content-oriented index (graph-excluded)
+│   ├── overview.md        # High-level summary + Health Dashboard
+│   ├── QUESTIONS.md       # Open-question queue
+│   ├── sources/           # type:source — one page per raw source
+│   ├── entities/          # type:entity — people, orgs, products, works, papers
+│   ├── concepts/          # type:concept — ideas, frameworks, techniques (uses aliases)
+│   ├── synthesis/         # type:synthesis — cross-source / cross-concept analysis
+│   └── templates/         # Page templates (source/entity/concept/synthesis) the LLM copies
+├── outputs/               # Non-markdown query products (slides, charts, lint reports, exports)
+└── scripts/
+    └── lint.py            # 9-check wiki linter (stdlib only)
 ```
 
-The scaffolded KB additionally creates 6 typed `raw/` subdirs (`articles`, `clippings`, `images`, `pdfs`, `notes`, `personal`), 4 typed `wiki/` content subdirs (`sources`, `entities`, `concepts`, `synthesis`), and an empty `outputs/` bucket — these are populated as the user ingests content.
+### What's inside this repo
+
+This is the skill itself, not a KB. Skills load from `~/.claude/skills/<name>/`, so the layout here is:
+
+```
+karpathy-llm-wiki-creator/
+├── SKILL.md               # Scaffold instructions the LLM follows
+├── README.md              # This file
+├── LICENSE
+└── templates/             # Files copied verbatim into each new KB on scaffold
+    ├── AGENTS.md  CLAUDE.md  README.md  log.md  gitignore
+    ├── wiki/{index,overview,QUESTIONS}.md
+    ├── wiki/templates/{source,entity,concept,synthesis}.md
+    └── scripts/lint.py
+```
 
 ## License
 
